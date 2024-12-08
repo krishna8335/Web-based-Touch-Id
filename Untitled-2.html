@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrated System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            margin-top: 50px;
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        form {
+            margin: 20px auto;
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <h1>Integrated Prototype</h1>
+    
+    <!-- Section 1: Previous System -->
+    <form id="data-form">
+        <h2>Previous Form Section</h2>
+        <input type="text" id="data-input" placeholder="Enter Data" style="width: 80%; padding: 10px;">
+        <button type="button" id="submit-data">Submit Data</button>
+        <p id="form-status"></p>
+    </form>
+
+    <!-- Section 2: Fingerprint Authentication -->
+    <h2>Fingerprint Authentication</h2>
+    <button id="register">Register Fingerprint</button>
+    <button id="authenticate">Authenticate Fingerprint</button>
+    <p id="status"></p>
+
+    <script>
+        // Fingerprint Authentication Code
+        async function registerFingerprint() {
+            const statusElement = document.getElementById("status");
+            try {
+                const options = {
+                    publicKey: {
+                        challenge: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(32))),
+                        rp: { name: "Fingerprint Unlock Demo" },
+                        user: {
+                            id: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(16))),
+                            name: "user@example.com",
+                            displayName: "John Doe"
+                        },
+                        pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                        authenticatorSelection: { authenticatorAttachment: "platform" },
+                        timeout: 60000,
+                        attestation: "direct"
+                    }
+                };
+
+                const credential = await navigator.credentials.create(options);
+                console.log("Registration successful:", credential);
+                statusElement.textContent = "Registration successful!";
+                statusElement.style.color = "green";
+            } catch (err) {
+                console.error("Error during registration:", err);
+                statusElement.textContent = "Registration failed. Please try again.";
+                statusElement.style.color = "red";
+            }
+        }
+
+        async function authenticateFingerprint() {
+            const statusElement = document.getElementById("status");
+            try {
+                const options = {
+                    publicKey: {
+                        challenge: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(32))),
+                        allowCredentials: [
+                            {
+                                id: new Uint8Array([/* Provide registered credential ID */]),
+                                type: "public-key"
+                            }
+                        ],
+                        timeout: 60000
+                    }
+                };
+
+                const assertion = await navigator.credentials.get(options);
+                console.log("Authentication successful:", assertion);
+                statusElement.textContent = "Authentication successful!";
+                statusElement.style.color = "green";
+            } catch (err) {
+                console.error("Error during authentication:", err);
+                statusElement.textContent = "Authentication failed. Please try again.";
+                statusElement.style.color = "red";
+            }
+        }
+
+        // Event Listeners for Fingerprint Authentication
+        document.getElementById("register").addEventListener("click", registerFingerprint);
+        document.getElementById("authenticate").addEventListener("click", authenticateFingerprint);
+
+        // Previous System Logic
+        document.getElementById("submit-data").addEventListener("click", () => {
+            const input = document.getElementById("data-input").value;
+            const formStatus = document.getElementById("form-status");
+            if (input.trim() === "") {
+                formStatus.textContent = "Please enter valid data.";
+                formStatus.style.color = "red";
+            } else {
+                formStatus.textContent = `Data "${input}" submitted successfully!`;
+                formStatus.style.color = "green";
+            }
+        });
+                    
+    </script>
+</body>
+</html>
